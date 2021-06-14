@@ -16,25 +16,20 @@ Big TODO:
 */
 
 
+ViInt32 initialize (ViSession instrumentID[10]) {
+	// Shows number of instruments, it's types and initializes
+	// Returns number of instruments, fills array of ID instrument's
+	cout << "Initialization..." << endl;
 
-int main() {
-	cout << "Fuck you!" << endl; // Just greeting
-
-	// TODO: make a special function for this shit
-	// If you don't know which and/or how many instruments
-	// are present on the machine, use this code fragment
-	ViSession instrumentID[10];
-	ViInt32 nbrInstruments;
+	ViInt32 instrumentsNumber;
 	ViStatus status;
 	ViString options = "";
-	status = Acqrs_getNbrInstruments(&nbrInstruments);
+	status = Acqrs_getNbrInstruments(&instrumentsNumber);
 	// TODO: add exit if number of instruments is 0
-	cout << "The number of available instruments is " << nbrInstruments << endl;
+	cout << "The number of available instruments is " << instrumentsNumber << endl;
 
-
-	// TODO: make a special function for this shit
 	// Initialize the instruments
-	for (ViInt32 devIndex = 0; devIndex < nbrInstruments; devIndex++) {
+	for (ViInt32 devIndex = 0; devIndex < instrumentsNumber; devIndex++) {
 		ViInt32 devTypeP;
 		ViStatus status = Acqrs_getDevTypeByIndex(devIndex, &devTypeP); // get type of instrument
 
@@ -46,8 +41,8 @@ int main() {
 			cout << "The number " << devIndex << " is TC Time-to-Digital Converter" << endl;
 		}
 
-		//ViRsrc resourceName = "PCI::INSTR0"; // TODO: try to fix it later
-		char resourceName[20] = "20";
+		// ViRsrc resourceName = "PCI::INSTR0"; // TODO: try to fix it later
+		char resourceName[20] = "";
 		sprintf_s(resourceName, "PCI::INSTR%d", devIndex);
 		status = Acqrs_InitWithOptions(resourceName, VI_FALSE, VI_FALSE, options, &(instrumentID[devIndex]));
 
@@ -58,6 +53,16 @@ int main() {
 			cout << "Something go wrong... Error code: " << status << endl;
 		}
 	}
+
+	return instrumentsNumber;
+}
+
+
+int main() {
+	// Initialization
+	ViSession instrumentID[10];
+	ViInt32 nbrInstruments;
+	nbrInstruments = initialize(instrumentID);
 	
 
 	// TODO: make a special function for this shit
