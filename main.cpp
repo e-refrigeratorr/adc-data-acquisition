@@ -58,15 +58,9 @@ ViInt32 initialize (ViSession instrumentID[10]) {
 }
 
 
-int main() {
-	// Initialization
-	ViSession instrumentID[10];
-	ViInt32 nbrInstruments;
-	nbrInstruments = initialize(instrumentID);
-	
-
-	// TODO: make a special function for this shit
-	// Configure equipment
+long configure (ViInt32 nbrInstruments, ViSession instrumentID[10], long nbrSamples, long nbrSegments) {
+	// Reads file with parameters and configures equipment
+	// Returns number of segments and samples from user's input
 	// Configuration values:
 	ifstream configFile("acquire.config");
 	string configValue;
@@ -89,24 +83,17 @@ int main() {
 	}
 
 	// TODO: comment variables with documentation
-	double sampInterval = parameters[0] * 1e-9; // Calculate in seconds
-	double delayTime = parameters[1] * 1e-9;; // Calculate in seconds
+	double sampInterval = parameters[0] * 1e-9; // Convert to seconds
+	double delayTime = parameters[1] * 1e-9;; // Convert to seconds
 	long channel = (long) parameters[2];
 	long coupling = (long) parameters[3];
 	long bandwidth = (long) parameters[4];
-	double fullScale = parameters[5] / 1000; // Calculate in Volts
+	double fullScale = parameters[5] / 1000; // Convert to Volts
 	double offset = parameters[6];
 	long trigCoupling = (long) parameters[7];
 	long trigSlope = (long) parameters[8];
-	double trigLevel = parameters[9] / parameters[5] * 100; // Calculate in percents of vertical Full Scale
+	double trigLevel = parameters[9] / parameters[5] * 100; // Convert to percents of vertical Full Scale
 	
-	long nbrSamples, nbrSegments;
-	cout << "Enter number of samples: ";
-	cin >> nbrSamples;
-	cout << "Enter number of segments: ";
-	cin >> nbrSegments;
-	
-	// Let's the fuck up
 	// TODO: cover this functions in try-catch
 	for (long i = 0; i < nbrInstruments; i++) {
 		AcqrsD1_configHorizontal(instrumentID[i], sampInterval, delayTime);
@@ -115,7 +102,29 @@ int main() {
 		AcqrsD1_configTrigClass(instrumentID[i], 0, 0x00000001, 0, 0, 0.0, 0.0);
 		AcqrsD1_configTrigSource(instrumentID[i], channel, trigCoupling, trigSlope, trigLevel, 0.0);
 	}
+
 	cout << "Equipment configurated successfully!" << endl;
+
+	return channel;
+}
+
+
+int main () {
+	ViStatus status;
+
+	// Initialization
+	ViSession instrumentID[10];
+	ViInt32 nbrInstruments;
+	nbrInstruments = initialize(instrumentID);
+	
+
+	// Configuration
+	long nbrSamples, nbrSegments;
+	cout << "Enter number of samples: ";
+	cin >> nbrSamples;
+	cout << "Enter number of segments: ";
+	cin >> nbrSegments;
+	long channel = configure(nbrInstruments, instrumentID[10], nbrSamples, nbrSegments);
 
 
 	// Let's get data
