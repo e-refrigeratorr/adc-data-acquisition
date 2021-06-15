@@ -109,6 +109,15 @@ long configure (ViInt32 nbrInstruments, ViSession instrumentID[10], long nbrSamp
 }
 
 
+int turnOff () {
+	// Stops the instruments
+	Acqrs_closeAll(); // TODO: try to make for-cycle to stop each instrument independently
+	cout << "All instruments successfully stopped." << endl;
+
+	return 0;
+}
+
+
 int main () {
 	ViStatus status;
 
@@ -188,11 +197,9 @@ int main () {
 	outFile.close();
 	delete[] adcArrayP;
 
-
-	// TODO: make a special function for this shit
-	// Stop the instruments
-	Acqrs_closeAll(); // TODO: try to make for-cycle to stop each instrument independently
-	cout << "All instruments successfully stopped." << endl;
+	
+	// Closing
+	turnOff();
 
 	return 0;
 }
