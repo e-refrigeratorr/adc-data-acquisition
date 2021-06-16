@@ -109,6 +109,26 @@ long configure (ViInt32 nbrInstruments, ViSession instrumentID[10], long nbrSamp
 }
 
 
+int writeData (AqDataDescriptor dataDesc, ViInt8 * adcArrayP) {
+	// Writes the data into a file
+	// TODO: add date-mark in the name of file: "acqiris-data-xx-xx-xxxx.data"
+	ofstream outFile("Acqiris.data");
+	outFile << "# Agilent Acqiris Waveform Channel 1" << endl;
+	outFile << "# Samples acquired: " << dataDesc.returnedSamplesPerSeg * dataDesc.returnedSegments << endl;
+	outFile << "# Voltage" << endl;
+
+	for (ViInt32 i = firstPoint; i < firstPoint + dataDesc.returnedSamplesPerSeg; i++) {
+		outFile << int(adcArrayP[i]) * dataDesc.vGain - dataDesc.vOffset << endl; // Volts
+	}
+
+	outFile.close();
+	
+	cout << "Data was written successfully." << endl;
+
+	return 0;
+}
+
+
 int turnOff () {
 	// Stops the instruments
 	Acqrs_closeAll(); // TODO: try to make for-cycle to stop each instrument independently
@@ -183,18 +203,8 @@ int main () {
 	}
 
 	
-	// Write the waveform into a file
-	// TODO: add date-mark in name of file: "acqiris-data-xx-xx-xxxx.data"
-	ofstream outFile("Acqiris.data");
-	outFile << "# Agilent Acqiris Waveform Channel 1" << endl;
-	outFile << "# Samples acquired: " << dataDesc.returnedSamplesPerSeg * dataDesc.returnedSegments << endl;
-	outFile << "# Voltage" << endl;
-
-	for (ViInt32 i = firstPoint; i < firstPoint + dataDesc.returnedSamplesPerSeg; i++) {
-		outFile << int(adcArrayP[i]) * dataDesc.vGain - dataDesc.vOffset << endl; // Volts
-	}
-
-	outFile.close();
+	// Writing data
+	writeData(dataDesc, adcArrayP);
 	delete[] adcArrayP;
 
 	
